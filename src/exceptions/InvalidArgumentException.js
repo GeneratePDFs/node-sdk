@@ -1,11 +1,7 @@
 export class InvalidArgumentException extends Error {
-  public constructor(message: string) {
+  constructor(message) {
     super(message);
     this.name = 'InvalidArgumentException';
     Object.setPrototypeOf(this, InvalidArgumentException.prototype);
   }
 }
-
-
-
-

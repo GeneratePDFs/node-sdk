@@ -142,7 +142,7 @@ We accept contributions via Pull Requests on [GitHub](https://github.com/Generat
 
 ### Pull Requests
 
-- **Follow TypeScript best practices** - Use proper types, avoid `any`, use explicit return types
+- **Follow JavaScript best practices** - Write clean, maintainable code
 - **Add tests!** - Your patch won't be accepted if it doesn't have tests.
 - **Document any change in behaviour** - Make sure the README / CHANGELOG and any other relevant documentation are kept up-to-date.
 - **Consider our release cycle** - We try to follow semver. Randomly breaking public APIs is not an option.
@@ -157,6 +157,8 @@ See [CHANGELOG.md](CHANGELOG.md) for a history of changes.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
 
 
 

@@ -8,12 +8,12 @@ import { InvalidArgumentException } from '../exceptions/InvalidArgumentException
 import { RuntimeException } from '../exceptions/RuntimeException.js';
 
 // Mock fetch globally
-const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 describe('Pdf', () => {
-  let client: GeneratePDFs;
-  let apiToken: string;
+  let client;
+  let apiToken;
 
   beforeEach(() => {
     apiToken = 'test-api-token';
@@ -44,7 +44,7 @@ describe('Pdf', () => {
       const data = {
         id: 123,
         // Missing other required fields
-      } as any;
+      };
 
       expect(() => Pdf.fromArray(data, client)).toThrow(InvalidArgumentException);
       expect(() => Pdf.fromArray(data, client)).toThrow('Invalid PDF data structure');
@@ -147,7 +147,7 @@ describe('Pdf', () => {
           const buffer = Buffer.from(pdfContent, 'utf-8');
           return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
         },
-      } as Response);
+      });
 
       const pdf = Pdf.fromArray(data, client);
       const content = await pdf.download();
@@ -176,7 +176,7 @@ describe('Pdf', () => {
           const buffer = Buffer.from(pdfContent, 'utf-8');
           return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
         },
-      } as Response);
+      });
 
       const pdf = Pdf.fromArray(data, client);
 
@@ -244,7 +244,7 @@ describe('Pdf', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       // Refresh the PDF
       const refreshedPdf = await pdf.refresh();
@@ -257,5 +257,3 @@ describe('Pdf', () => {
     });
   });
 });
-
-

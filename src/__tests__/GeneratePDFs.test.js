@@ -7,12 +7,12 @@ import { Pdf } from '../Pdf.js';
 import { InvalidArgumentException } from '../exceptions/InvalidArgumentException.js';
 
 // Mock fetch globally
-const mockFetch = jest.fn() as jest.MockedFunction<typeof fetch>;
+const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
 describe('GeneratePDFs', () => {
-  let apiToken: string;
-  let baseUrl: string;
+  let apiToken;
+  let baseUrl;
 
   beforeEach(() => {
     apiToken = 'test-api-token';
@@ -76,7 +76,7 @@ describe('GeneratePDFs', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const pdf = await client.generateFromHtml(htmlFile);
@@ -122,7 +122,7 @@ describe('GeneratePDFs', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const pdf = await client.generateFromHtml(htmlFile, cssFile);
@@ -130,7 +130,7 @@ describe('GeneratePDFs', () => {
       expect(pdf).toBeInstanceOf(Pdf);
 
       const fetchCall = mockFetch.mock.calls[0];
-      const body = JSON.parse(fetchCall[1]?.body as string);
+      const body = JSON.parse(fetchCall[1]?.body);
       expect(body.html).toBeDefined();
       expect(body.css).toBeDefined();
 
@@ -162,7 +162,7 @@ describe('GeneratePDFs', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const pdf = await client.generateFromHtml(htmlFile, null, [
@@ -175,7 +175,7 @@ describe('GeneratePDFs', () => {
       expect(pdf).toBeInstanceOf(Pdf);
 
       const fetchCall = mockFetch.mock.calls[0];
-      const body = JSON.parse(fetchCall[1]?.body as string);
+      const body = JSON.parse(fetchCall[1]?.body);
       expect(body.html).toBeDefined();
       expect(body.images).toBeDefined();
       expect(Array.isArray(body.images)).toBe(true);
@@ -200,7 +200,7 @@ describe('GeneratePDFs', () => {
       const mockResponseObj = {
         ok: true,
         json: async () => mockResponse,
-      } as Response;
+      };
 
       mockFetch.mockResolvedValueOnce(mockResponseObj);
       mockFetch.mockResolvedValueOnce(mockResponseObj);
@@ -224,7 +224,7 @@ describe('GeneratePDFs', () => {
         status: 400,
         statusText: 'Bad Request',
         text: async () => 'Error message',
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
 
@@ -258,7 +258,7 @@ describe('GeneratePDFs', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const pdf = await client.generateFromUrl('https://example.com');
@@ -268,7 +268,7 @@ describe('GeneratePDFs', () => {
       expect(pdf.getName()).toBe('url-example.com-2024-01-01-12-00-00.pdf');
 
       const fetchCall = mockFetch.mock.calls[0];
-      const body = JSON.parse(fetchCall[1]?.body as string);
+      const body = JSON.parse(fetchCall[1]?.body);
       expect(body.url).toBe('https://example.com');
     });
   });
@@ -298,7 +298,7 @@ describe('GeneratePDFs', () => {
       mockFetch.mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const pdf = await client.getPdf(789);
@@ -326,7 +326,7 @@ describe('GeneratePDFs', () => {
       const mockResponseObj = {
         ok: true,
         json: async () => mockResponse,
-      } as Response;
+      };
 
       mockFetch.mockResolvedValueOnce(mockResponseObj);
       mockFetch.mockResolvedValueOnce(mockResponseObj);
@@ -349,7 +349,7 @@ describe('GeneratePDFs', () => {
           const buffer = Buffer.from(pdfContent, 'utf-8');
           return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
         },
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
       const content = await client.downloadPdf(downloadUrl);
@@ -374,7 +374,7 @@ describe('GeneratePDFs', () => {
         ok: false,
         status: 404,
         statusText: 'Not Found',
-      } as Response);
+      });
 
       const client = GeneratePDFs.connect(apiToken);
 
@@ -382,5 +382,3 @@ describe('GeneratePDFs', () => {
     });
   });
 });
-
-

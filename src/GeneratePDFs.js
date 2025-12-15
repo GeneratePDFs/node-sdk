@@ -2,62 +2,36 @@ import { readFileSync, existsSync } from 'fs';
 import { Pdf } from './Pdf.js';
 import { InvalidArgumentException } from './exceptions/InvalidArgumentException.js';
 
-interface ImageInput {
-  name: string;
-  path: string;
-  mimeType?: string;
-}
-
-interface ProcessedImage {
-  name: string;
-  content: string;
-  mime_type: string;
-}
-
-interface ApiResponse {
-  data?: {
-    id: number;
-    name: string;
-    status: string;
-    download_url: string;
-    created_at: string;
-  };
-}
-
 export class GeneratePDFs {
-  private static readonly BASE_URL = 'https://api.generatepdfs.com';
-  private readonly apiToken: string;
-  private readonly baseUrl: string;
+  static BASE_URL = 'https://api.generatepdfs.com';
+  #apiToken;
+  #baseUrl;
 
-  private constructor(apiToken: string) {
-    this.apiToken = apiToken;
-    this.baseUrl = GeneratePDFs.BASE_URL;
+  constructor(apiToken) {
+    this.#apiToken = apiToken;
+    this.#baseUrl = GeneratePDFs.BASE_URL;
   }
 
   /**
    * Create a new GeneratePDFs instance with the provided API token.
    *
-   * @param apiToken The API token for authentication
-   * @returns GeneratePDFs instance
+   * @param {string} apiToken The API token for authentication
+   * @returns {GeneratePDFs} GeneratePDFs instance
    */
-  public static connect(apiToken: string): GeneratePDFs {
+  static connect(apiToken) {
     return new GeneratePDFs(apiToken);
   }
 
   /**
    * Generate a PDF from HTML file(s) with optional CSS and images.
    *
-   * @param htmlPath Path to the HTML file
-   * @param cssPath Optional path to the CSS file
-   * @param images Optional array of image files
-   * @returns PDF object containing PDF information
-   * @throws InvalidArgumentException If files are invalid
+   * @param {string} htmlPath Path to the HTML file
+   * @param {string|null} cssPath Optional path to the CSS file
+   * @param {Array<{name: string, path: string, mimeType?: string}>} images Optional array of image files
+   * @returns {Promise<Pdf>} PDF object containing PDF information
+   * @throws {InvalidArgumentException} If files are invalid
    */
-  public async generateFromHtml(
-    htmlPath: string,
-    cssPath?: string | null,
-    images: ImageInput[] = []
-  ): Promise<Pdf> {
+  async generateFromHtml(htmlPath, cssPath = null, images = []) {
     if (!existsSync(htmlPath)) {
       throw new InvalidArgumentException(`HTML file not found or not readable: ${htmlPath}`);
     }
@@ -65,7 +39,7 @@ export class GeneratePDFs {
     const htmlContent = readFileSync(htmlPath);
     const htmlBase64 = htmlContent.toString('base64');
 
-    const data: Record<string, unknown> = {
+    const data = {
       html: htmlBase64,
     };
 
@@ -79,10 +53,10 @@ export class GeneratePDFs {
     }
 
     if (images.length > 0) {
-      data.images = this.processImages(images);
+      data.images = this.#processImages(images);
     }
 
-    const response = await this.makeRequest('/pdfs/generate', data);
+    const response = await this.#makeRequest('/pdfs/generate', data);
 
     if (!response.data) {
       throw new InvalidArgumentException('Invalid API response: missing data');
@@ -94,11 +68,11 @@ export class GeneratePDFs {
   /**
    * Generate a PDF from a URL.
    *
-   * @param url The URL to convert to PDF
-   * @returns PDF object containing PDF information
-   * @throws InvalidArgumentException If URL is invalid
+   * @param {string} url The URL to convert to PDF
+   * @returns {Promise<Pdf>} PDF object containing PDF information
+   * @throws {InvalidArgumentException} If URL is invalid
    */
-  public async generateFromUrl(url: string): Promise<Pdf> {
+  async generateFromUrl(url) {
     try {
       new URL(url);
     } catch {
@@ -109,7 +83,7 @@ export class GeneratePDFs {
       url: url,
     };
 
-    const response = await this.makeRequest('/pdfs/generate', data);
+    const response = await this.#makeRequest('/pdfs/generate', data);
 
     if (!response.data) {
       throw new InvalidArgumentException('Invalid API response: missing data');
@@ -121,16 +95,16 @@ export class GeneratePDFs {
   /**
    * Get a PDF by its ID.
    *
-   * @param id The PDF ID
-   * @returns PDF object containing PDF information
-   * @throws InvalidArgumentException If ID is invalid
+   * @param {number} id The PDF ID
+   * @returns {Promise<Pdf>} PDF object containing PDF information
+   * @throws {InvalidArgumentException} If ID is invalid
    */
-  public async getPdf(id: number): Promise<Pdf> {
+  async getPdf(id) {
     if (id <= 0) {
       throw new InvalidArgumentException(`Invalid PDF ID: ${id}`);
     }
 
-    const response = await this.makeGetRequest(`/pdfs/${id}`);
+    const response = await this.#makeGetRequest(`/pdfs/${id}`);
 
     if (!response.data) {
       throw new InvalidArgumentException('Invalid API response: missing data');
@@ -142,11 +116,11 @@ export class GeneratePDFs {
   /**
    * Process image files and return formatted array for API.
    *
-   * @param images Array of image inputs
-   * @returns Array of processed images
+   * @param {Array<{name: string, path: string, mimeType?: string}>} images Array of image inputs
+   * @returns {Array<{name: string, content: string, mime_type: string}>} Array of processed images
    */
-  private processImages(images: ImageInput[]): ProcessedImage[] {
-    const processed: ProcessedImage[] = [];
+  #processImages(images) {
+    const processed = [];
 
     for (const image of images) {
       if (!image.path || !image.name) {
@@ -164,7 +138,7 @@ export class GeneratePDFs {
       const contentBase64 = content.toString('base64');
 
       // Detect mime type if not provided
-      const mimeType = image.mimeType ?? this.detectMimeType(path);
+      const mimeType = image.mimeType ?? this.#detectMimeType(path);
 
       processed.push({
         name: name,
@@ -179,12 +153,12 @@ export class GeneratePDFs {
   /**
    * Detect MIME type of a file based on extension.
    *
-   * @param filePath Path to the file
-   * @returns MIME type
+   * @param {string} filePath Path to the file
+   * @returns {string} MIME type
    */
-  private detectMimeType(filePath: string): string {
+  #detectMimeType(filePath) {
     const extension = filePath.split('.').pop()?.toLowerCase() ?? '';
-    const mimeTypes: Record<string, string> = {
+    const mimeTypes = {
       jpg: 'image/jpeg',
       jpeg: 'image/jpeg',
       png: 'image/png',
@@ -199,13 +173,13 @@ export class GeneratePDFs {
   /**
    * Download a PDF from the API.
    *
-   * @param downloadUrl The download URL for the PDF
-   * @returns PDF binary content as Buffer
+   * @param {string} downloadUrl The download URL for the PDF
+   * @returns {Promise<Buffer>} PDF binary content as Buffer
    */
-  public async downloadPdf(downloadUrl: string): Promise<Buffer> {
+  async downloadPdf(downloadUrl) {
     const response = await fetch(downloadUrl, {
       headers: {
-        Authorization: `Bearer ${this.apiToken}`,
+        Authorization: `Bearer ${this.#apiToken}`,
       },
     });
 
@@ -220,17 +194,17 @@ export class GeneratePDFs {
   /**
    * Make an HTTP POST request to the API.
    *
-   * @param endpoint API endpoint
-   * @param data Request data
-   * @returns Decoded JSON response
+   * @param {string} endpoint API endpoint
+   * @param {Record<string, unknown>} data Request data
+   * @returns {Promise<{data?: {id: number, name: string, status: string, download_url: string, created_at: string}}>} Decoded JSON response
    */
-  private async makeRequest(endpoint: string, data: Record<string, unknown>): Promise<ApiResponse> {
-    const url = `${this.baseUrl}${endpoint}`;
+  async #makeRequest(endpoint, data) {
+    const url = `${this.#baseUrl}${endpoint}`;
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${this.apiToken}`,
+        Authorization: `Bearer ${this.#apiToken}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
@@ -241,21 +215,21 @@ export class GeneratePDFs {
       throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    return (await response.json()) as ApiResponse;
+    return await response.json();
   }
 
   /**
    * Make an HTTP GET request to the API.
    *
-   * @param endpoint API endpoint
-   * @returns Decoded JSON response
+   * @param {string} endpoint API endpoint
+   * @returns {Promise<{data?: {id: number, name: string, status: string, download_url: string, created_at: string}}>} Decoded JSON response
    */
-  private async makeGetRequest(endpoint: string): Promise<ApiResponse> {
-    const url = `${this.baseUrl}${endpoint}`;
+  async #makeGetRequest(endpoint) {
+    const url = `${this.#baseUrl}${endpoint}`;
 
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.apiToken}`,
+        Authorization: `Bearer ${this.#apiToken}`,
       },
     });
 
@@ -264,10 +238,6 @@ export class GeneratePDFs {
       throw new Error(`API request failed: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
-    return (await response.json()) as ApiResponse;
+    return await response.json();
   }
 }
-
-
-
-

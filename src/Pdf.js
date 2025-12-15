@@ -3,42 +3,37 @@ import { GeneratePDFs } from './GeneratePDFs.js';
 import { InvalidArgumentException } from './exceptions/InvalidArgumentException.js';
 import { RuntimeException } from './exceptions/RuntimeException.js';
 
-interface PdfData {
-  id: number;
-  name: string;
-  status: string;
-  download_url: string;
-  created_at: string;
-}
-
 export class Pdf {
-  private readonly client: GeneratePDFs;
+  #client;
+  #id;
+  #name;
+  #status;
+  #downloadUrl;
+  #createdAt;
 
-  public constructor(
-    private readonly id: number,
-    private readonly name: string,
-    private readonly status: string,
-    private readonly downloadUrl: string,
-    private readonly createdAt: Date,
-    client: GeneratePDFs
-  ) {
-    this.client = client;
+  constructor(id, name, status, downloadUrl, createdAt, client) {
+    this.#id = id;
+    this.#name = name;
+    this.#status = status;
+    this.#downloadUrl = downloadUrl;
+    this.#createdAt = createdAt;
+    this.#client = client;
   }
 
   /**
    * Create a Pdf instance from API response data.
    *
-   * @param data API response data
-   * @param client The GeneratePDFs client instance
-   * @returns Pdf instance
+   * @param {{id: number, name: string, status: string, download_url: string, created_at: string}} data API response data
+   * @param {GeneratePDFs} client The GeneratePDFs client instance
+   * @returns {Pdf} Pdf instance
    */
-  public static fromArray(data: PdfData, client: GeneratePDFs): Pdf {
+  static fromArray(data, client) {
     if (!data.id || !data.name || !data.status || !data.download_url || !data.created_at) {
       throw new InvalidArgumentException('Invalid PDF data structure');
     }
 
     // Parse the created_at date
-    let createdAt: Date;
+    let createdAt;
     try {
       createdAt = new Date(data.created_at);
       if (isNaN(createdAt.getTime())) {
@@ -64,79 +59,79 @@ export class Pdf {
   /**
    * Get the PDF ID.
    *
-   * @returns PDF ID
+   * @returns {number} PDF ID
    */
-  public getId(): number {
-    return this.id;
+  getId() {
+    return this.#id;
   }
 
   /**
    * Get the PDF name.
    *
-   * @returns PDF name
+   * @returns {string} PDF name
    */
-  public getName(): string {
-    return this.name;
+  getName() {
+    return this.#name;
   }
 
   /**
    * Get the PDF status.
    *
-   * @returns PDF status
+   * @returns {string} PDF status
    */
-  public getStatus(): string {
-    return this.status;
+  getStatus() {
+    return this.#status;
   }
 
   /**
    * Get the download URL.
    *
-   * @returns Download URL
+   * @returns {string} Download URL
    */
-  public getDownloadUrl(): string {
-    return this.downloadUrl;
+  getDownloadUrl() {
+    return this.#downloadUrl;
   }
 
   /**
    * Get the creation date.
    *
-   * @returns Creation date
+   * @returns {Date} Creation date
    */
-  public getCreatedAt(): Date {
-    return this.createdAt;
+  getCreatedAt() {
+    return this.#createdAt;
   }
 
   /**
    * Check if the PDF is ready for download.
    *
-   * @returns True if PDF is ready
+   * @returns {boolean} True if PDF is ready
    */
-  public isReady(): boolean {
-    return this.status === 'completed';
+  isReady() {
+    return this.#status === 'completed';
   }
 
   /**
    * Download the PDF content.
    *
-   * @returns PDF binary content as Buffer
-   * @throws RuntimeException If the PDF is not ready or download fails
+   * @returns {Promise<Buffer>} PDF binary content as Buffer
+   * @throws {RuntimeException} If the PDF is not ready or download fails
    */
-  public async download(): Promise<Buffer> {
+  async download() {
     if (!this.isReady()) {
-      throw new RuntimeException(`PDF is not ready yet. Current status: ${this.status}`);
+      throw new RuntimeException(`PDF is not ready yet. Current status: ${this.#status}`);
     }
 
-    return await this.client.downloadPdf(this.downloadUrl);
+    return await this.#client.downloadPdf(this.#downloadUrl);
   }
 
   /**
    * Download the PDF and save it to a file.
    *
-   * @param filePath Path where to save the PDF file
-   * @returns True on success
-   * @throws RuntimeException If the PDF is not ready or download fails
+   * @param {string} filePath Path where to save the PDF file
+   * @returns {Promise<boolean>} True on success
+   * @throws {RuntimeException} If the PDF is not ready or download fails
    */
-  public async downloadToFile(filePath: string): Promise<boolean> {
+  async downloadToFile(filePath) {
     const content = await this.download();
 
     try {
@@ -150,13 +145,9 @@ export class Pdf {
   /**
    * Refresh the PDF data from the API.
    *
-   * @returns A new Pdf instance with updated data
+   * @returns {Promise<Pdf>} A new Pdf instance with updated data
    */
-  public async refresh(): Promise<Pdf> {
-    return await this.client.getPdf(this.id);
+  async refresh() {
+    return await this.#client.getPdf(this.#id);
   }
 }
-
-
-
-
