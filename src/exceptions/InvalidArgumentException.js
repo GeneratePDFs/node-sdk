@@ -5,3 +5,4 @@ export class InvalidArgumentException extends Error {
     Object.setPrototypeOf(this, InvalidArgumentException.prototype);
   }
 }
+

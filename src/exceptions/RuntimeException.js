@@ -5,3 +5,4 @@ export class RuntimeException extends Error {
     Object.setPrototypeOf(this, RuntimeException.prototype);
   }
 }
+

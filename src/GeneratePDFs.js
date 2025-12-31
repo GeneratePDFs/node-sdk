@@ -241,3 +241,4 @@ export class GeneratePDFs {
     return await response.json();
   }
 }
+
