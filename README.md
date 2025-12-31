@@ -7,7 +7,7 @@ Upload your HTML files, along with any CSS files and images to generate a PDF. A
 ## Installation
 
 ```bash
-npm install generatepdfs/node-sdk
+npm install @generatepdfs/node-sdk
 ```
 
 ## Get your API Token
@@ -19,7 +19,7 @@ Sign up for an account on [GeneratePDFs.com](https://generatepdfs.com) and head 
 ### Basic Setup
 
 ```javascript
-import { GeneratePDFs } from 'generatepdfs/node-sdk';
+import { GeneratePDFs } from '@generatepdfs/node-sdk';
 
 const client = GeneratePDFs.connect('YOUR_API_TOKEN');
 ```
@@ -27,7 +27,7 @@ const client = GeneratePDFs.connect('YOUR_API_TOKEN');
 ### Generate PDF from HTML File
 
 ```javascript
-import { GeneratePDFs } from 'generatepdfs/node-sdk';
+import { GeneratePDFs } from '@generatepdfs/node-sdk';
 
 // Simple HTML file
 const pdf = await client.generateFromHtml('/path/to/file.html');

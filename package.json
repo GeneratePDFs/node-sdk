@@ -1,5 +1,5 @@
 {
-  "name": "generatepdfs/node-sdk",
+  "name": "@generatepdfs/node-sdk",
   "version": "1.0.0",
   "description": "Node.js SDK for GeneratePDFs.com API",
   "type": "module",
